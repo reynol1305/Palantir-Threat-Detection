@@ -1,5 +1,13 @@
 # **Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
 
+### **Disclaimer**
+
+This repository is intended **for educational and research purposes only**.
+It is **not** a 100% protection against Palantir-related activity or any other advanced threats.
+Security is about **reducing risk**, not eliminating it.
+
+---
+
 ## **Table of Contents**
 
 1. [Disclaimer](#disclaimer)
@@ -22,11 +30,7 @@
 18. [Support This Project](#support-this-project)
 19. [Credits](#credits)
 
-### **Disclaimer**
 
-This repository is intended **for educational and research purposes only**.
-It is **not** a 100% protection against Palantir-related activity or any other advanced threats.
-Security is about **reducing risk**, not eliminating it.
 
 ---
 
