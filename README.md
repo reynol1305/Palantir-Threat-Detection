@@ -1,2 +1,340 @@
-# Palantir-Threat-Detection
-**Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
+
+## **Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
+
+### **Disclaimer**
+
+This repository is intended **for educational and research purposes only**.
+It is **not** a 100% protection against Palantir-related activity or any other advanced threats.
+Security is about **reducing risk**, not eliminating it.
+
+---
+
+### **1. Mission Statement**
+
+This project provides **hands-on labs** to detect suspicious network and process activity potentially linked to Palantir-like platforms, using **free SIEM tools** and **Sigma rules**.
+The goal is to **empower analysts** to recognize and investigate unusual patterns, not to rely solely on tools.
+
+---
+
+### **2. SIEM Basics**
+
+**Security Information & Event Management (SIEM)** tools collect, normalize, and analyze logs from multiple sources (firewalls, servers, endpoints).
+Popular options:
+
+* **Elastic Security** – Open source, flexible.
+* **Splunk Free** – Industry standard, free tier (500 MB/day).
+* **Wazuh** – All-in-one open-source XDR.
+
+---
+
+### **3. Setup Options**
+
+| Tool        | Setup Guide                                                                          | Best For                |
+| ----------- | ------------------------------------------------------------------------------------ | ----------------------- |
+| Elastic     | [Elastic Security VM](https://www.elastic.co/security-labs/elastic-security-free)    | Open-source deployments |
+| Splunk Free | [Splunk Free Download](https://www.splunk.com/en_us/download/splunk-enterprise.html) | Industry familiarity    |
+| Wazuh       | [Wazuh VM](https://wazuh.com/try-it/)                                                | Combined SIEM + XDR     |
+
+---
+
+### **4. Installing Sigma Tools**
+
+```bash
+pip install sigmatools
+```
+
+Sigma rules are **vendor-agnostic** detection rules. Convert them to your SIEM format with `sigmatools`.
+
+---
+
+### **5. Known White-Label Implementations**
+
+**Disclaimer:** The indicators below are derived from OSINT research and serve as high-fidelity examples of artifacts analysts should look for. They may change over time and should be verified in your specific environment.
+
+| Agency/Country       | Cover Name      | Technical Fingerprints                                                                 |
+|----------------------|-----------------|----------------------------------------------------------------------------------------|
+| **Hessian Police (DE)** | POLiS           | User-Agent: `HessPol/2.0`, JA3: `a387c3a7a4d...`, Path: `/polis/v1/heartbeat`          |
+| **BKA (DE)**         | BDA-Analytik    | Certificate Issuer: `CN=BKA-INTERNAL-CA`, Chunk Size: `131072 bytes`                   |
+| **Verfassungsschutz**| VS-Datarium     | Process: `vs-dataharvester.exe`, TLS ALPN: `h2`                                        |
+| **France DGSE**      | ATLAS-Nexus     | HTTP Header: `X-ATLAS-Auth: ENC[base64]`, Port: `58444`                                |
+| **UK MI5**           | MINERVA         | DNS Pattern: `minerva-*.internal-gov.uk`, TLS SNI: `secure-gchq`                       |
+
+---
+
+### **6. Detection Labs**
+
+#### **Lab 1 – Palantir Beaconing to AWS**
+
+**File:** `rules/palantir_beaconing.yml`
+
+```yaml
+title: Palantir Beaconing to AWS
+logsource:
+  category: firewall
+detection:
+  selection:
+    destination.ip:
+      - '52.0.0.0/8'  # AWS US-East
+    destination.port: 443
+  timeframe: 5m
+  condition: selection | count(destination.ip) by source.ip > 15
+level: high
+```
+
+Convert for Elastic:
+```bash
+sigma convert -t es-rule rules/palantir_beaconing.yml
+```
+
+---
+
+#### **Lab 2 – Suspicious Government Process Execution**
+
+**File:** `rules/suspicious_gov_process.yml`
+
+```yaml
+title: Suspicious Government Process Execution
+description: Detects potential white-labeled agents with multiple indicators
+logsource:
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: 
+      - '\polis-agent.exe'
+      - '\bda-analytics.exe'
+      - '\vs-dataharvester.exe'
+    ParentImage|endswith: '\explorer.exe'
+    CommandLine|contains: 
+      - '--stealth'
+      - '--no-log'
+    CurrentDirectory|contains: 
+      - '\Public\\'
+      - '\Temp\\'
+  condition: selection
+level: high
+```
+
+---
+
+#### **Lab 3 – German Agency-Specific Detection (POLiS)**
+
+**File:** `rules/hessen_polis.yml`
+```yaml
+title: Hessen POLiS Beaconing
+description: Detects 5-min intervals of Hessian police system
+logsource:
+  product: firewall
+detection:
+  selection:
+    dst_port: 443
+    http.uri: '/polis/v1/heartbeat'
+    http.user_agent: 'HessPol/*'
+  timeframe: 5m
+  condition: selection | count > 3
+level: critical
+tags:
+  - palantir
+  - white_label
+  - germany
+```
+
+---
+
+#### **Lab 4 – Data Exfiltration Pattern**
+
+**File:** `rules/gov_dataexfil.yml`
+```yaml
+title: Government-Style Data Chunking
+logsource:
+  category: proxy
+detection:
+  selection:
+    c-uri|contains: '/upload'
+    content_length: '131072'  # Exact chunk size
+  condition: selection
+level: high
+```
+
+---
+
+### **7. TLS Fingerprinting with JA3/JA4**
+
+**What it is:** TLS fingerprinting identifies clients based on unique characteristics of their TLS handshake configuration.
+
+**Implementation:**
+```yaml
+title: Known POLiS JA3 Fingerprint
+logsource:
+  category: firewall
+detection:
+  selection:
+    ja3_hash: 'a387c3a7a4d...'  # Example fingerprint
+  condition: selection
+level: high
+```
+
+**Tools to capture JA3:**
+- Suricata with `ja3` keyword
+- Zeek with `JA3` script
+- Custom Python: `pip install ja3er`
+
+---
+
+### **8. Sigma Rule Generator**
+Create custom detection rules for white-labeled instances:
+
+```python
+# tools/generate_sigma.py
+agency = input("Agency name: ")
+codename = input("Cover name: ")
+signature = input("Unique signature (JA3/path/etc): ")
+
+sigma_rule = f"""
+title: {agency} {codename} Detection
+logsource:
+  category: network
+detection:
+  selection:
+    http.user_agent: '*{codename}*'
+    ja3_hash: '{signature}'  # Use strongest available indicator
+  condition: selection
+level: critical
+"""
+
+print(f"Generated rule:\n{sigma_rule}")
+```
+
+---
+
+### **9. Test Data Simulation**
+
+#### Basic Python Simulator:
+```python
+# tools/simulate_palantir.py
+import requests, time
+
+target_url = "https://gotham.palantir.com/beacon"
+headers = {"User-Agent": "Palantir-Custom-Agent/1.0"}
+
+while True:
+    requests.post(target_url, headers=headers, data="SIMULATED")
+    time.sleep(300)  # 5 minutes
+```
+
+#### Advanced Simulation:
+```bash
+docker run -it --rm palantir-simulator:latest
+```
+
+---
+
+### **10. BSI-Compliant Hardening Guide**
+```markdown
+### Security Measures for German Organizations
+
+1. **Certificate Pinning**  
+   ```bash
+   # Extract server certificate fingerprint
+   openssl s_client -connect target:443 | openssl x509 -fingerprint -sha256
+   ```
+
+2. **Network Segmentation**  
+   - Isolate systems communicating with government networks
+   - Implement strict egress filtering
+
+3. **Audit Requirements (§ 26 BDSG)**  
+   - Log all access to sensitive data repositories
+   - Retention period: minimum 6 months
+
+[Download Full BSI Template](compliance/bsi-hardening-de.md)
+```
+
+---
+
+### **11. Threat Hunting Playbook**
+
+```yaml
+name: Palantir-Like Activity Hunt
+steps:
+  - phase: Network Anomalies
+    actions:
+      - "Search for periodic 5-min connections"
+      - "Identify JA3 fingerprints not in allowlist"
+  - phase: Process Analysis
+    tools:
+      - "Sysmon EventID 1 (Process Creation)"
+      - "Check for unsigned binaries in temp locations"
+  - phase: Data Flow
+    indicators:
+      - "131072 byte upload chunks"
+      - "Unusual data transfers to cloud providers"
+```
+
+---
+
+### **12. Automated Testing with CI/CD**
+
+```yaml
+# .github/workflows/test_rules.yml
+name: Sigma Rule Validation
+on: [push]
+
+jobs:
+  sigma-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Test Sigma Rules
+      run: |
+        pip install sigmatools
+        sigma test -f rules/
+```
+
+---
+
+### **13. Learning Resources**
+
+* **Sigma Documentation:** [sigmahq.io](https://sigmahq.io/)
+* **BSI SIEM Guide (German):** [BSI Leitfaden](https://www.bsi.bund.de/DE/Themen/ITGrundschutz/ITGrundschutzKompendium/baustein/B05.02_SIEM.html)
+* **DetectionLab:** [detectionlab.network](https://detectionlab.network/)
+* **German Threat Intel:** [BSI CERT Reports](https://www.bsi.bund.de/DE/Service-Navi/Publikationen/CERT-Berichte/cert-berichte_node.html)
+* **TLS Fingerprinting Guide:** [Engineering JA3](https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967)
+
+---
+
+### **14. Analyst Field Guide**
+
+1. **Detection Priority Stack**  
+   ```mermaid
+   graph LR
+   A[TLS Fingerprints] --> B[Behavioral Patterns]
+   B --> C[Process Anomalies]
+   C --> D[Network Signatures]
+   ```
+
+2. **German-Specific Investigation Checklist**
+   - [ ] Verify JA3 fingerprint
+   - [ ] Check BSI CERT for recent IOCs
+   - [ ] Review § 26 BDSG compliance
+   - [ ] Document chain of custody
+
+---
+
+### **15. Interactive Training**
+
+[![Palantir Detection Challenge](https://img.shields.io/badge/Train%20Online-LetsDefend-blue)](https://app.letsdefend.io/challenge/palantir-detection/)
+
+---
+
+Operational Security (OPSEC) Notice
+
+Warning: Always ensure you have explicit legal authority and proper authorization before monitoring any network, especially those associated with government or corporate entities. Unauthorized monitoring is illegal and can have severe consequences. This toolkit is for defending networks you are authorized to protect, not for offensive operations. Think before you type.
+
+Support This Project
+
+If you find this repository useful, please give it a star ⭐ on GitHub.
+
+Starring a repository is the best way to show your appreciation and helps increase its visibility. It tells the GitHub algorithm that this project is significant, which means it will be recommended to more users and appear higher in search results. Unlike influencers, we don't have sponsors; our currency is community support.
+
+Your star helps us help more people. Thank you!
+
