@@ -96,6 +96,8 @@ Sigma rules are **vendor-agnostic** detection rules. Convert them to your SIEM f
 | **DGSE (FR)**        | LYRA-9          | UDP Beaconing on Port `4789`, Process: `lyra_service.exe`, CLI Arg: `--no-netlog`      |
 | **AISE (IT)**        | SPECTRE-V       | ICMP Payloads (Type=69), File Path: `C:\Windows\Temp\spv_[RANDOM].tmp`, JA4: `t13d...` |
 
+
+**The technical indicators listed are snapshots and may change. Your contributions are welcome to keep this knowledge up-to-date.**
 ---
 
 ### **6. Detection Labs**
