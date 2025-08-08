@@ -1,4 +1,5 @@
-# **Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
+# **Palantir Threat Detection 
+#### Open SIEM Labs with Sigma Rules**
 
 ### **Disclaimer**
 
