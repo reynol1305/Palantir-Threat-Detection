@@ -287,7 +287,7 @@ docker run -it --rm palantir-simulator:latest
 ---
 
 ### **10. BSI-Compliant Hardening Guide**
-```markdown
+
 ### Security Measures for German Organizations
 
 1. **Certificate Pinning**  
@@ -304,8 +304,6 @@ docker run -it --rm palantir-simulator:latest
    - Log all access to sensitive data repositories
    - Retention period: minimum 6 months
 
-[Download Full BSI Template](compliance/bsi-hardening-de.md)
-```
 
 ---
 
