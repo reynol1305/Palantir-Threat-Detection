@@ -9,10 +9,19 @@ Security is about **reducing risk**, not eliminating it.
 
 ---
 
-### **1. Mission Statement**
+### **1. Background & Mission**
 
-This project provides **hands-on labs** to detect suspicious network and process activity potentially linked to Palantir-like platforms, using **free SIEM tools** and **Sigma rules**.
-The goal is to **empower analysts** to recognize and investigate unusual patterns, not to rely solely on tools.
+Technology is never neutral. This project was born from that understanding.
+
+Powerful data analysis and surveillance technology, like that developed by Palantir, is now a globally traded commodity. It is sold to governments and organizations with little to no ethical oversight regarding their human rights records or political objectives. In the hands of democratic states, it promises security. In the hands of authoritarian regimes, it becomes a weapon for the oppression of minorities, journalists, and political dissenters.
+
+This fundamental imbalance of power is the reason this repository exists.
+
+Our mission is to help level the playing field. We provide **open-source tools and hands-on labs** to detect the digital fingerprints of these powerful surveillance platforms. By using vendor-agnostic **Sigma rules** and free **SIEM platforms**, we make these detection capabilities accessible to everyone—not just those with nation-state budgets.
+
+This is more than a technical exercise; it is an act of **digital transparency**. The goal is to **empower security analysts, researchers, and defenders** to recognize these patterns, understand their implications, and hold powerful actors accountable. We believe that the best defense against the abuse of surveillance technology is a well-informed, prepared, and ethically-minded community.
+
+
 
 ---
 
@@ -337,4 +346,3 @@ If you find this repository useful, please give it a star ⭐ on GitHub.
 Starring a repository is the best way to show your appreciation and helps increase its visibility. It tells the GitHub algorithm that this project is significant, which means it will be recommended to more users and appear higher in search results. Unlike influencers, we don't have sponsors; our currency is community support.
 
 Your star helps us help more people. Thank you!
-
