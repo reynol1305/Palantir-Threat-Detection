@@ -40,9 +40,9 @@ Popular options:
 
 | Tool        | Setup Guide                                                                          | Best For                |
 | ----------- | ------------------------------------------------------------------------------------ | ----------------------- |
-| Elastic     | [Elastic Security VM](https://www.elastic.co/security-labs/elastic-security-free)    | Open-source deployments |
-| Splunk Free | [Splunk Free Download](https://www.splunk.com/en_us/download/splunk-enterprise.html) | Industry familiarity    |
-| Wazuh       | [Wazuh VM](https://wazuh.com/try-it/)                                                | Combined SIEM + XDR     |
+| Elastic     | [Elastic Security VM](https://www.elastic.co/)    | Open-source deployments |
+| Splunk Free | [Splunk Free Download](https://www.splunk.com/) | Industry familiarity    |
+| Wazuh       | [Wazuh VM](https://wazuh.com/)                                                | Combined SIEM + XDR     |
 
 ---
 
