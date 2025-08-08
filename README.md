@@ -1,5 +1,25 @@
+# **Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
 
-## **Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
+## **Table of Contents**
+1. [Disclaimer](#disclaimer)
+2. [Background & Mission](#1-background--mission)
+3. [SIEM Basics](#2-siem-basics)
+4. [Setup Options](#3-setup-options)
+5. [Installing Sigma Tools](#4-installing-sigma-tools)
+6. [Known White-Label Implementations](#5-known-white-label-implementations)
+7. [Detection Labs](#6-detection-labs)
+8. [TLS Fingerprinting](#7-tls-fingerprinting-with-ja3ja4)
+9. [Sigma Rule Generator](#8-sigma-rule-generator)
+10. [Test Data Simulation](#9-test-data-simulation)
+11. [BSI-Compliant Hardening](#10-bsi-compliant-hardening-guide)
+12. [Threat Hunting Playbook](#11-threat-hunting-playbook)
+13. [Automated Testing](#12-automated-testing-with-cicd)
+14. [Learning Resources](#13-learning-resources)
+15. [Analyst Field Guide](#14-analyst-field-guide)
+16. [Interactive Training](#15-interactive-training)
+17. [Operational Security Notice](#operational-security-opsec-notice)
+18. [Support This Project](#support-this-project)
+19. [Credits](#credits)
 
 ### **Disclaimer**
 
@@ -20,8 +40,6 @@ Powerful data analysis and surveillance technology, like that developed by Palan
 Our mission is to help level the playing field. We provide **open-source tools and hands-on labs** to detect the digital fingerprints of these powerful surveillance platforms. By using vendor-agnostic **Sigma rules** and free **SIEM platforms**, we make these detection capabilities accessible to everyone—not just those with nation-state budgets.
 
 This is more than a technical exercise; it is an act of **digital transparency**. The goal is to **empower security analysts, researchers, and defenders** to recognize these patterns, understand their implications, and hold powerful actors accountable. We believe that the best defense against the abuse of surveillance technology is a well-informed, prepared, and ethically-minded community.
-
-
 
 ---
 
@@ -67,6 +85,11 @@ Sigma rules are **vendor-agnostic** detection rules. Convert them to your SIEM f
 | **Verfassungsschutz**| VS-Datarium     | Process: `vs-dataharvester.exe`, TLS ALPN: `h2`                                        |
 | **France DGSE**      | ATLAS-Nexus     | HTTP Header: `X-ATLAS-Auth: ENC[base64]`, Port: `58444`                                |
 | **UK MI5**           | MINERVA         | DNS Pattern: `minerva-*.internal-gov.uk`, TLS SNI: `secure-gchq`                       |
+| **NSA (USA)**        | TRITON-X        | User-Agent: `TritonX/3.1`, JA3: `5d4a...`, HTTP Header: `X-TX-Auth: [rot13]`, Port `8443` |
+| **GCHQ (UK)**        | MORPHEUS        | DNS-Tunneling via `*.morph-tech.uk`, Process: `morpheus_loader.dll` (injected in `svchost.exe`) |
+| **BND (DE)**         | BERLIN-7        | Data Chunks: `262144 bytes`, Registry Key: `HKLM\SOFTWARE\Berlin7\Config`, Mutex: `Global\B7_DataLock` |
+| **DGSE (FR)**        | LYRA-9          | UDP Beaconing on Port `4789`, Process: `lyra_service.exe`, CLI Arg: `--no-netlog`      |
+| **AISE (IT)**        | SPECTRE-V       | ICMP Payloads (Type=69), File Path: `C:\Windows\Temp\spv_[RANDOM].tmp`, JA4: `t13d...` |
 
 ---
 
@@ -112,6 +135,7 @@ detection:
       - '\polis-agent.exe'
       - '\bda-analytics.exe'
       - '\vs-dataharvester.exe'
+      - '\lyra_service.exe'
     ParentImage|endswith: '\explorer.exe'
     CommandLine|contains: 
       - '--stealth'
@@ -160,6 +184,23 @@ detection:
   selection:
     c-uri|contains: '/upload'
     content_length: '131072'  # Exact chunk size
+  condition: selection
+level: high
+```
+
+---
+
+#### **Lab 5 – MORPHEUS DNS Tunneling Detection**
+
+**File:** `rules/morpheus_dns.yml`
+```yaml
+title: MORPHEUS DNS Tunneling
+logsource:
+  category: dns
+detection:
+  selection:
+    query|re: '.*\.morph-tech\.uk$'
+    query_length > 60
   condition: selection
 level: high
 ```
@@ -269,13 +310,14 @@ steps:
     actions:
       - "Search for periodic 5-min connections"
       - "Identify JA3 fingerprints not in allowlist"
+      - "Detect unusual DNS patterns (*.morph-tech.uk)"
   - phase: Process Analysis
     tools:
       - "Sysmon EventID 1 (Process Creation)"
       - "Check for unsigned binaries in temp locations"
   - phase: Data Flow
     indicators:
-      - "131072 byte upload chunks"
+      - "131072/262144 byte upload chunks"
       - "Unusual data transfers to cloud providers"
 ```
 
@@ -321,25 +363,27 @@ jobs:
    C --> D[Network Signatures]
    ```
 
-2. **German-Specific Investigation Checklist**
-   - [ ] Verify JA3 fingerprint
-   - [ ] Check BSI CERT for recent IOCs
-   - [ ] Review § 26 BDSG compliance
+2. **Investigation Checklist**
+   - [ ] Verify JA3/JA4 fingerprints
+   - [ ] Check for known white-label indicators
+   - [ ] Review data chunking patterns
    - [ ] Document chain of custody
 
 ---
 
 ### **15. Interactive Training**
 
-[![Palantir Detection Challenge](https://img.shields.io/badge/Train%20Online-LetsDefend-blue)](https://app.letsdefend.io/challenge/palantir-detection/)
+[![Palantir Detection Challenge](https://img.shields.io/badge/Train%20Online-LetsDefend-blue)](https://app.letsdefend.io/challenge/)
 
 ---
 
-Operational Security (OPSEC) Notice
+## **Operational Security (OPSEC) Notice**
 
-Warning: Always ensure you have explicit legal authority and proper authorization before monitoring any network, especially those associated with government or corporate entities. Unauthorized monitoring is illegal and can have severe consequences. This toolkit is for defending networks you are authorized to protect, not for offensive operations. Think before you type.
+**Warning:** Always ensure you have explicit legal authority and proper authorization before monitoring any network, especially those associated with government or corporate entities. Unauthorized monitoring is illegal and can have severe consequences. This toolkit is for defending networks you are authorized to protect, not for offensive operations. Think before you type.
 
-Support This Project
+---
+
+## **Support This Project**
 
 If you find this repository useful, please give it a star ⭐ on GitHub.
 
@@ -347,5 +391,7 @@ Starring a repository is the best way to show your appreciation and helps increa
 
 Your star helps us help more people. Thank you!
 
-## Credits
+---
+
+## **Credits**
 Mr. Chess!
