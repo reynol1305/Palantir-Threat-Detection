@@ -1,6 +1,7 @@
 # **Palantir Threat Detection: Open SIEM Labs with Sigma Rules**
 
 ## **Table of Contents**
+<details>
 1. [Disclaimer](#disclaimer)
 2. [Background & Mission](#1-background--mission)
 3. [SIEM Basics](#2-siem-basics)
@@ -20,7 +21,7 @@
 17. [Operational Security Notice](#operational-security-opsec-notice)
 18. [Support This Project](#support-this-project)
 19. [Credits](#credits)
-
+</details>
 ### **Disclaimer**
 
 This repository is intended **for educational and research purposes only**.
